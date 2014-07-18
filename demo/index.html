@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -11,14 +12,72 @@
 	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	    <![endif]-->
 
-		<title>WoT Tactic Viewer v1.0</title>
+		<title>WoT Tactic Viewer</title>
 
 		<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+
+		<style type="text/css">
+			.margin-top {
+				margin-top: 5px;
+			}
+
+			.disp-block {
+				display: block;
+			}
+
+			.btn-active {
+				color: #333;
+				background-color: #e6e6e6;
+				border-color: #adadad;
+			}
+
+			.hand {
+				cursor: pointer;
+			}
+		</style>
 	</head>
 	<body>
-		
+		<div class="container">
+			<div class="page-header">
+				<h1>WoT Tactic Viewer</h1>
+				<p class="lead">Basic demonstration</p>
+			</div>
+			<div class="row">
+				<div class="col-md-8" id="canvas-container">
+					<canvas class="hand" id="tactic-viewer" width="750" height="750"></canvas>
+				</div>
+				<div class="col-md-4">
+					<label for="map-select">Map</label>
+					<select class="form-control" id="map-select" name="map-select"></select>
+					<label class="margin-top disp-block">Shapes</label>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" id="draw-square">Square</button>
+						<button type="button" class="btn btn-default" id="draw-circle">Circle</button>
+					</div>
+					<div class="tool-options-container disp-block">
+						<!-- Add colour picker/stroke size, etc. -->
+					</div>
+					<label class="margin-top disp-block">Drawing</label>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" id="draw-square">Line</button>
+						<button type="button" class="btn btn-default" id="draw-circle">Polygon</button>
+						<button type="button" class="btn btn-default" id="draw-circle">Arrow</button>
+					</div>
+					<label class="margin-top disp-block">Misc</label>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" id="ping-map" data-tool="ping-map-colour">Ping map</button>
+						<button type="button" class="btn btn-no-hold btn-default" id="clear-map">Clear map</button>
+					</div>
+					<div class="tool-options-container disp-block margin-top">
+						<input type="color" class="tool colour-tool" id="ping-map-colour" name="ping-map-colour" value="#ff0000">
+					</div>
+					<!-- TODO: Add controls -->
+				</div>
+			</div>
+		</div>
 
 		<script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+		<script src="http://cdn.jsdelivr.net/jquery.jcanvas/13.04.26/jcanvas.min.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 		<script src="../js/tank-viewer.js"></script>
 	</body>
