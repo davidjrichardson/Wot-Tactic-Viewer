@@ -6,7 +6,8 @@ A HTML5/JavaScript based tactic sharing/viewing platform for World of Tanks.
 
 [Bootstrap 3](http://getbootstrap.com/), 
 [jQuery 2.1.0](http://jquery.com/), 
-[jCanvas](http://calebevans.me/projects/jcanvas/)
+[KineticJS](http://kineticjs.com/), 
+[Socket.IO](http://socket.io/)
 
 ## Contributors
 
