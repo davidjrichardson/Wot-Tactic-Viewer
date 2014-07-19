@@ -10,8 +10,10 @@ $(document).ready(function() {
 	// TODO: Set this to default to the first map alphabetically
 	var $source = "../img/01_karelia.jpg";
 	updateMap($source, $canvas);
-	// Store all colours in associative array
+	// Store all colours in associative array and set on change for each picker
 	$(".colour-tool").each(function(element) {
+		$palette[$(this).attr("id")] = hexToRgb($(this).val());
+	}).change(function(element) {
 		$palette[$(this).attr("id")] = hexToRgb($(this).val());
 	});
 	$(".tool").hide();
@@ -37,13 +39,6 @@ $(document).ready(function() {
 		updateMap($source, $canvas);
 	});
 
-	// Update colour array on value change for associated picker
-	$(".colour-tool").change(function(element) {
-		$palette[$(this).attr("id")] = hexToRgb($(this).val());
-
-		console.log($palette);
-	});
-
 	// Handle tool button click
 	$(".btn").on("click", function() {
 		$selected = $(this).text();
@@ -61,6 +56,7 @@ $(document).ready(function() {
 			// If the button is associated with a tool (or set) then show the tool(s)
 			if($(this).data("tool")) {
 				$("#" + $(this).data("tool")).show();
+				$("label[for='" + $(this).data("tool") + "']").show();
 			}
 		}
 	});
@@ -128,8 +124,8 @@ function updateMap($source, $canvas) {
  * Function that changes a hexadecimal value to rgb values in Object form
  * @param {string} hex - A hexadecimal colour value i.e.: #0000ff
  */
-function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+function hexToRgb($hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec($hex);
     return result ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
