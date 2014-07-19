@@ -71,41 +71,45 @@ $(document).ready(function() {
 		switch($selected) {
 			case "draw-square":
 				// TODO: Get colour for square/circle
-
-				$("#" +$selected).removeClass("btn-active").blur();
-				$selected = "";
+				var $rectColour = $palette["draw-csq-opts-colour"];
 
 				$canvas.drawRect({
 					layer: true,
 					draggable: true,
 					bringToFront: true,
-					fillStyle: "#fff",
+					fillStyle: "rgba(" + $rectColour.r + ", " + 
+						$rectColour.g + ", " + 
+						$rectColour.b + ", 1)",
 					dragstart: function(layer) {
 						$canvas.animateLayer(layer, {
-							fillStyle: "#777"
-						}, 250, function() {
-							console.log("Start animation finished");
-						});
+							fillStyle: "rgba(" + $rectColour.r + ", " + 
+								$rectColour.g + ", " + 
+								$rectColour.b + ", 0.75)"
+						}, 250);
 					},
 					dragstop: function(layer) {
 						$canvas.animateLayer(layer, {
-							fillStyle: "#FFF"
-						}, 250, function() {
-							console.log("Stop animation finished");
-						});
+							fillStyle: "rgba(" + $rectColour.r + ", " + 
+								$rectColour.g + ", " + 
+								$rectColour.b + ", 1)"
+						}, 250);
 					},
 					x: event.offsetX, y: event.offsetY,
 					width: 100, height: 100
 				});
 
+				$("#" +$selected).removeClass("btn-active").blur();
+				$selected = "";
+
 				break;
 			case "ping-map":
-				var $pingColour = $palette["ping-map-colour"];
+				var $pingColour = $palette["ping-map-colour"],
+					$id = $.now();
 
 				// Draw the ping circle to the map on the ping layer
 				$canvas.drawArc({
 					layer: true,
-					name: "ping",
+					name: "ping" + $id,
 					fillStyle: "rgba(" + $pingColour.r + ", " + 
 						$pingColour.g + ", " + 
 						$pingColour.b + ", 1)",
@@ -114,14 +118,14 @@ $(document).ready(function() {
 				});
 
 				// Animate the layer's size and colour then remove it from the canvas
-				$canvas.animateLayer("ping", {
+				$canvas.animateLayer("ping" + $id, {
 					x: event.offsetX, y: event.offsetY,
 					radius: 30,
 					fillStyle: "rgba(" + $pingColour.r + ", " + 
 						$pingColour.g + ", " + 
 						$pingColour.b + ", 0)",
 				}, 250, function(layer) {
-					$canvas.removeLayer(layer);
+					$canvas.removeLayer("ping" + $id);
 				});
 
 				break;
