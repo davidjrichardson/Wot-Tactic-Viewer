@@ -41,7 +41,7 @@ $(document).ready(function() {
 
 	// Handle tool button click
 	$(".btn").on("click", function() {
-		$selected = $(this).text();
+		$selected = $(this).attr("id");
 
 		// If the button isn't a tool button then hide all tools
 		if(!$(this).hasClass("tool")) {
@@ -59,12 +59,47 @@ $(document).ready(function() {
 				$("label[for='" + $(this).data("tool") + "']").show();
 			}
 		}
+
+		if($(this).attr("id") == "clear-map") {
+			// Remove all elements from the canvas through redisplaying the map
+			updateMap($source, $canvas);
+		}
 	});
 
 	// Handle canvas clicks
 	$canvas.on("click", function(event) {
 		switch($selected) {
-			case "Ping map":
+			case "draw-square":
+				// TODO: Get colour for square/circle
+
+				$("#" +$selected).removeClass("btn-active").blur();
+				$selected = "";
+
+				$canvas.drawRect({
+					layer: true,
+					draggable: true,
+					bringToFront: true,
+					fillStyle: "#fff",
+					dragstart: function(layer) {
+						$canvas.animateLayer(layer, {
+							fillStyle: "#777"
+						}, 250, function() {
+							console.log("Start animation finished");
+						});
+					},
+					dragstop: function(layer) {
+						$canvas.animateLayer(layer, {
+							fillStyle: "#FFF"
+						}, 250, function() {
+							console.log("Stop animation finished");
+						});
+					},
+					x: event.offsetX, y: event.offsetY,
+					width: 100, height: 100
+				});
+
+				break;
+			case "ping-map":
 				var $pingColour = $palette["ping-map-colour"];
 
 				// Draw the ping circle to the map on the ping layer
@@ -89,10 +124,6 @@ $(document).ready(function() {
 					$canvas.removeLayer(layer);
 				});
 
-				break;
-			case "Clear map":
-				// Remove all elements from the canvas through redisplaying the map
-				updateMap($source, $canvas);
 				break;
 		}
 	});
