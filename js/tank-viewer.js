@@ -1,10 +1,16 @@
 // Global vars
-var stage, map, container;
+var stage, map, container, client;
+
+// Close the socket before the window closes to free up memory
+$(window).on('beforeunload', function(){
+    client.close();
+});
 
 $(document).ready(function() {
 	// Init of tactic viewer
 	var selector = $("#map-select");
-
+	
+	client = io("http://projects.tankski.co.uk:3000");
 	container = $("#canvas-container");
 	stage = new Kinetic.Stage({
 		container: "canvas-container",
@@ -17,7 +23,7 @@ $(document).ready(function() {
 	// Setup map changer
 	selector.change(function() {
 		map = "../img/" + $(this).find(":selected").val() + ".jpg";
-		changeMap();
+		client.emit("changeMap", {"map": map});
 	});
 
 	// Add maps to the map selector using the mappings JSON
@@ -34,6 +40,13 @@ $(document).ready(function() {
 			});
 		}
 	});
+
+	// Setup socket events
+	client.on("changeMap", function(data) {
+		map = data["map"];
+		// TODO: Select map in selector
+		changeMap();
+	});
 });
 
 /**
@@ -47,7 +60,8 @@ function changeMap() {
 	if(stage.getLayers().length == 0) {
 		var mapLayer = new Kinetic.Layer({
 			name: "bg"
-		}), mapImageObj = new Image();
+		}), mapImageObj = new Image(), 
+		overlayImageObj = new Image();
 
 		// Load image into layer and display the new layer
 		mapImageObj.onload = function() {
@@ -59,12 +73,25 @@ function changeMap() {
 			});
 
 			mapLayer.add(mapImage);
-			stage.add(mapLayer);
 
-			// Remove the original bg layer
-			if(stage.find(".bg").length > 1) {
-				stage.find(".bg")[0].destroy();
+			// Then load the map overlay, bring it to the front and add it
+			overlayImageObj.onload = function() {
+				var overlayImage = new Kinetic.Image({
+					x: 0, y: 0,
+					image: overlayImageObj,
+					width: 750, height: 750,
+					name: "overlayImage",
+					opacity: 0.5
+				});
+
+				overlayImage.moveToTop();
+
+				mapLayer.add(overlayImage);
 			}
+			overlayImageObj.src = "../img/overlay.png";
+
+			// Add the map to the stage
+			stage.add(mapLayer);
 		};
 		mapImageObj.src = map;
 	} else {
