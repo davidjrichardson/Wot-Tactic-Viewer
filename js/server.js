@@ -18,8 +18,12 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("clearMap", function(data) {
-        console.log("Clear map request");
+        io.emit("clearMap", data);
     });
+
+    socket.on("pingMap", function(data) {
+        io.emit("pingMap", data);
+    })
 
     socket.on("disconnect", function(socket) {
         console.log("Disconnecting socket");
