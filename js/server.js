@@ -9,11 +9,18 @@ var map = {"map": "../img/01_karelia.jpg"};
 
 io.sockets.on("connection", function(socket) {
     console.log("Connecting socket");
+
     socket.emit("changeMap", map);
+
     socket.on("changeMap", function(data) {
         map = data;
         io.emit("changeMap", map);
     });
+
+    socket.on("clearMap", function(data) {
+        console.log("Clear map request");
+    });
+
     socket.on("disconnect", function(socket) {
         console.log("Disconnecting socket");
     });

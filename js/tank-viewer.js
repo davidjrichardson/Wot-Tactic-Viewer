@@ -1,5 +1,5 @@
 // Global vars
-var stage, map, container, client;
+var stage, map, container, client, selectedTool, nick;
 
 // Close the socket before the window closes to free up memory
 $(window).on('beforeunload', function(){
@@ -18,14 +18,49 @@ $(document).ready(function() {
 		height: container.width()
 	});
 
+	// TODO: Set on(dis)connect listeners for the websocket
+
 	if(!client.connected) {
-		// TODO: If the client isn't connected then display error message
+		// TODO: If the client isn't connected then display error message + disable inputs
 	}
 
 	// Setup map changer
 	selector.change(function() {
 		map = "../img/" + $(this).find(":selected").val() + ".jpg";
 		client.emit("changeMap", {"map": map});
+	});
+
+	// Record any changes to the user's submitted nickname
+	$("#username-submit").click(function() {
+		nick = $("#username-input").val();
+	});
+
+	// Setup tools
+	$(".tool").hide();
+	$(".btn").click(function() {
+		selectedTool = $(this).attr("id");
+
+		// If the button isn't a tool button then hide all tools
+		if(!$(this).hasClass("tool")) {
+			$(".tool").hide();
+		}
+
+		// Remove the active css + apply it to current button if needed
+		$(".btn").removeClass("btn-active");
+		if(!$(this).hasClass("btn-no-hold")) {
+			$(this).addClass("btn-active");
+
+			// If the button is associated with a tool (or set) then show the tool(s)
+			if($(this).data("tool")) {
+				$("#" + $(this).data("tool")).show();
+				$("label[for='" + $(this).data("tool") + "']").show();
+			}
+		}
+
+		if($(this).attr("id") == "clear-map") {
+			// TODO: Clear the map
+			client.emit("clearMap", {});
+		}
 	});
 
 	// Add maps to the map selector using the mappings JSON

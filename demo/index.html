@@ -47,7 +47,14 @@
 					<div id="canvas-container"></div>
 				</div>
 				<div class="col-md-4">
-					<label for="map-select">Map</label>
+					<label for="username">Nickname</label>
+					<div class="input-group" name="username">
+						<input type="text" class="form-control" id="username-input">
+						<span class="input-group-btn">
+							<button type="button" class="btn btn-default" id="username-submit">Save</button>
+						</span>
+					</div>
+					<label class="margin-top" for="map-select">Map</label>
 					<select class="form-control" id="map-select" name="map-select"></select>
 					<label class="margin-top disp-block">Shapes</label>
 					<div class="btn-group">
@@ -80,7 +87,7 @@
 		</div>
 
 		<script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-		<script src="http://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.0.6/kinetic.min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.0.6/kinetic.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 		<script src="../js/tank-viewer.js"></script>
