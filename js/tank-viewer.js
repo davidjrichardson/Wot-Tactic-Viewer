@@ -18,11 +18,15 @@ $(document).ready(function() {
 		height: container.width()
 	});
 
-	// TODO: Set on(dis)connect listeners for the websocket
+	// Disable all inputs for disconnected states, enabling them only when connected
+	disableInputs(true);
 
-	if(!client.connected) {
-		// TODO: If the client isn't connected then display error message + disable inputs
-	}
+	client.on("connect", function() {
+		$("#username-submit, #username-input").prop("disabled", false);
+	});
+	client.on("disconnect", function() {
+		disableInputs(true);
+	});
 
 	// Setup map changer
 	selector.change(function() {
@@ -32,7 +36,19 @@ $(document).ready(function() {
 
 	// Record any changes to the user's submitted nickname
 	$("#username-submit").click(function() {
-		nick = $("#username-input").val();
+		if($("#username-input").val()) {
+			console.log("Submitted value is non-empty");
+			nick = $("#username-input").val();
+		} else {
+			$("#username-input").val(nick);
+		}
+
+		// Hide inputs if the nickname chosen is empty/undefined
+		disableInputs(nick ? false : true);
+		
+		if(!nick) {
+			$("#username-submit, #username-input").prop("disabled", false);
+		}
 	});
 
 	// Setup tools
@@ -85,6 +101,10 @@ $(document).ready(function() {
 		changeMap();
 	});
 });
+
+function disableInputs(disable) {
+	$("button, input, select").prop("disabled", disable);
+}
 
 /**
  * Function that changes the map to the one provided. Defaults to Karelia.
