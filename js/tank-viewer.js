@@ -18,7 +18,9 @@ $(document).ready(function() {
 		height: container.width()
 	});
 
-	changeMap();
+	if(!client.connected) {
+		// TODO: If the client isn't connected then display error message
+	}
 
 	// Setup map changer
 	selector.change(function() {
@@ -44,7 +46,7 @@ $(document).ready(function() {
 	// Setup socket events
 	client.on("changeMap", function(data) {
 		map = data["map"];
-		// TODO: Select map in selector
+		selector.val(map.replace("../img/", "").replace(".jpg", ""));
 		changeMap();
 	});
 });
@@ -72,9 +74,7 @@ function changeMap() {
 				name: "mapImage"
 			});
 
-			mapLayer.add(mapImage);
-
-			// Then load the map overlay, bring it to the front and add it
+			// Then load the map overlay
 			overlayImageObj.onload = function() {
 				var overlayImage = new Kinetic.Image({
 					x: 0, y: 0,
@@ -84,14 +84,12 @@ function changeMap() {
 					opacity: 0.5
 				});
 
-				overlayImage.moveToTop();
-
+				// Then set up the map background and render it to the stage
+				mapLayer.add(mapImage);
 				mapLayer.add(overlayImage);
+				stage.add(mapLayer);
 			}
 			overlayImageObj.src = "../img/overlay.png";
-
-			// Add the map to the stage
-			stage.add(mapLayer);
 		};
 		mapImageObj.src = map;
 	} else {
