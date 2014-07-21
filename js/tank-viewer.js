@@ -10,6 +10,7 @@ $(window).on('beforeunload', function(){
 $(document).ready(function() {
 	// Init of tactic viewer
 	var selector = $("#map-select");
+	var rect, down = false;
 	
 	client = io("http://projects.tankski.co.uk:3000");
 	container = $("#canvas-container");
@@ -26,21 +27,87 @@ $(document).ready(function() {
 	drawLayer.add(new Kinetic.Rect({
 		x: 0, y: 0,
 		width: container.width(),
-		height: container.width()
+		height: container.width(),
+		name: "drawBounds"
 	}));
 	stage.add(drawLayer);
 
 	// Setup event handling for the draw layer
 	drawLayer.on("mousedown", function(e) {
-		if(!nick) { 
-			return;
-		}
+		if(!nick) return;
+
+		var id = $.now();
 
 		switch(selectedTool) {
 			case "ping-map":
 				client.emit("pingMap", {
 					x: e.evt.layerX, y: e.evt.layerY,
 					colour: palette["ping-map-colour"],
+					from: nick
+				});
+				break;
+			case "draw-square":
+				// Start drawing a rect on the client
+				var colour = palette["draw-csq-opts-colour"];
+
+				down = true;
+				rect = new Kinetic.Rect({
+					name: "rect" + id,
+					x: e.evt.layerX, y: e.evt.layerY,
+					width: 1, height: 1,
+					fill: "rgba(" + colour.r + ", " + 
+						colour.g + ", " + 
+						colour.b + ", 1)",
+					draggable: true
+				});
+
+				// Set on drag listeners for the rect and draw it
+				rect.on("dragstart", function(e) {
+					e.target.moveToTop();
+				});
+				rect.on("dragend", function(e) {
+					client.emit("dragNode", {
+						name: e.target.attrs.name,
+						x: e.target.attrs.x, y: e.target.attrs.y,
+						from: nick
+					});
+				});
+
+				drawLayer.add(rect);
+				break;
+		}
+	});
+
+	drawLayer.on("mousemove", function(e) {
+		if(!down) return;
+
+		switch(selectedTool) {
+			case "draw-square":
+				// Update the rect being drawn on the client
+				var pos = rect.attrs;
+
+				rect.setWidth(e.evt.layerX - pos.x);
+				rect.setHeight(e.evt.layerY - pos.y);
+				drawLayer.draw();
+
+				break;
+		}
+	});
+
+	drawLayer.on("mouseup", function(e) {
+		down = false;
+
+		switch(selectedTool) {
+			case "draw-square":
+				// Send the new rect to other clients
+				var attrs = rect.attrs;
+
+				client.emit("drawNode", {
+					type: "rect",
+					x: attrs.x, y: attrs.y,
+					width: attrs.width, height: attrs.height,
+					fill: attrs.fill, 
+					name: attrs.name,
 					from: nick
 				});
 				break;
@@ -143,8 +210,68 @@ $(document).ready(function() {
 	// Clear the map 
 	client.on("clearMap", function(data) {
 		drawLayer.removeChildren();
+		drawLayer.add(new Kinetic.Rect({
+			x: 0, y: 0,
+			width: container.width(),
+			height: container.width(),
+			name: "drawBounds"
+		}));
 		drawLayer.draw();
-	})
+	});
+
+	// Move a node that has been dragged across screen
+	client.on("dragNode", function(data) {
+		if(data.from == nick) return;
+
+		// Get the node and place it on top of all siblings
+		var shape = drawLayer.find("." + data.name)[0];
+		shape.moveToTop();
+
+		// Animate node to new position
+		new Kinetic.Tween({
+			node: shape,
+			duration: 0.25,
+			x: data.x, y: data.y,
+			easing: Kinetic.Easings.EaseInOut
+		}).play();
+	});
+
+	// Draw a new node on the map
+	client.on("drawNode", function(data) {
+		if(data.from == nick) return;
+
+		var shape;
+
+		// Draw different shapes based on the type to be drawn
+		switch(data.type) {
+			case "rect":
+				shape = new Kinetic.Rect({
+					x: data.x, y: data.y,
+					width: data.width, height: data.height,
+					fill: data.fill,
+					name: data.name,
+					draggable: true
+				});
+
+				break;
+			default:
+				return;
+		}
+
+		// Set the on drag listeners for the shape and draw it
+		shape.on("dragstart", function(e) {
+			e.target.moveToTop();
+		});
+		shape.on("dragend", function(e) {
+			client.emit("dragNode", {
+				name: e.target.attrs.name,
+				x: e.target.attrs.x, y: e.target.attrs.y,
+				from: nick
+			});
+		});
+
+		drawLayer.add(shape).draw();
+	});
 
 	// Add a ping to the map, animate it and remove it
 	client.on("pingMap", function(data) {
@@ -156,6 +283,8 @@ $(document).ready(function() {
 			x: data.x, y: data.y,
 			name: "ping"
 		});
+
+		// TODO: Add text
 
 		drawLayer.add(ping);
 		drawLayer.draw();		
