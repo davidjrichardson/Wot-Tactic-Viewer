@@ -291,8 +291,8 @@ $(document).ready(function() {
 
 		new Kinetic.Tween({
 			node: ping,
-			duration: 0.25,
-			radius: 20,
+			duration: 0.4,
+			radius: 30,
 			easing: Kinetic.Easings.EaseInOut,
 			opacity: 0,
 			onFinish: function() {

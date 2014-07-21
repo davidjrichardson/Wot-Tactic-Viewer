@@ -24,6 +24,7 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("clearMap", function(data) {
+        nodes.length = 0;
         io.emit("clearMap", data);
     });
 
@@ -43,7 +44,7 @@ io.sockets.on("connection", function(socket) {
                 item.y = data.y;
             }
         });
-        
+
         io.emit("dragNode", data);
     });
 
