@@ -18,6 +18,15 @@ io.sockets.on("connection", function(socket) {
         socket.emit("drawNode", item);
     });
 
+    socket.on("redrawNodes", function(data) {
+        socket.emit("clearMap", {});
+        socket.emit("changeMap", map);
+
+        nodes.forEach(function(item) {
+            socket.emit("drawNode", item);
+        });
+    })
+
     socket.on("changeMap", function(data) {
         map = data;
         io.emit("changeMap", map);
@@ -30,12 +39,12 @@ io.sockets.on("connection", function(socket) {
 
     socket.on("pingMap", function(data) {
         io.emit("pingMap", data);
-    })
+    });
 
     socket.on("drawNode", function(data) {
         nodes.push(data);
         io.emit("drawNode", data);
-    })
+    });
 
     socket.on("dragNode", function(data) {
         nodes.forEach(function(item) {

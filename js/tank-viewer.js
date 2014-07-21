@@ -10,7 +10,7 @@ $(window).on('beforeunload', function(){
 $(document).ready(function() {
 	// Init of tactic viewer
 	var selector = $("#map-select");
-	var rect, down = false;
+	var shape, down = false;
 	
 	client = io("http://projects.tankski.co.uk:3000");
 	container = $("#canvas-container");
@@ -51,7 +51,7 @@ $(document).ready(function() {
 				var colour = palette["draw-csq-opts-colour"];
 
 				down = true;
-				rect = new Kinetic.Rect({
+				shape = new Kinetic.Rect({
 					name: "rect" + id,
 					x: e.evt.layerX, y: e.evt.layerY,
 					width: 1, height: 1,
@@ -62,10 +62,10 @@ $(document).ready(function() {
 				});
 
 				// Set on drag listeners for the rect and draw it
-				rect.on("dragstart", function(e) {
+				shape.on("dragstart", function(e) {
 					e.target.moveToTop();
 				});
-				rect.on("dragend", function(e) {
+				shape.on("dragend", function(e) {
 					client.emit("dragNode", {
 						name: e.target.attrs.name,
 						x: e.target.attrs.x, y: e.target.attrs.y,
@@ -73,7 +73,39 @@ $(document).ready(function() {
 					});
 				});
 
-				drawLayer.add(rect);
+				drawLayer.add(shape);
+				break;
+			case "draw-circle":
+				// Start drawing a circle on the client
+				var colour = palette["draw-csq-opts-colour"];
+
+				down = true;
+				shape = new Kinetic.Circle({
+					name: "circle" + id,
+					x: e.evt.layerX, y: e.evt.layerY,
+					radius: 1,
+					fill: "rgba(" + colour.r + ", " + 
+						colour.g + ", " + 
+						colour.b + ", 1)",
+					draggable: true
+				});
+
+				// Set on drag listeners for the circle and draw it
+				shape.on("dragstart", function(e) {
+					e.target.moveToTop();
+				});
+				shape.on("dragend", function(e) {
+					client.emit("dragNode", {
+						name: e.target.attrs.name,
+						x: e.target.attrs.x, y: e.target.attrs.y,
+						from: nick
+					});
+				});
+
+				drawLayer.add(shape);
+				break;
+			case "draw-line":
+				// TODO: Draw a line
 				break;
 		}
 	});
@@ -84,10 +116,19 @@ $(document).ready(function() {
 		switch(selectedTool) {
 			case "draw-square":
 				// Update the rect being drawn on the client
-				var pos = rect.attrs;
+				var pos = shape.attrs;
 
-				rect.setWidth(e.evt.layerX - pos.x);
-				rect.setHeight(e.evt.layerY - pos.y);
+				shape.setWidth(e.evt.layerX - pos.x);
+				shape.setHeight(e.evt.layerY - pos.y);
+				drawLayer.draw();
+
+				break;
+			case "draw-circle":
+				// Update the circle being drawn on the client
+				var pos = shape.attrs;
+				var radius = Math.round(Math.sqrt(Math.pow(e.evt.layerX - pos.x, 2) + Math.pow(e.evt.layerY - pos.y, 2)));
+
+				shape.setRadius(radius);
 				drawLayer.draw();
 
 				break;
@@ -100,12 +141,25 @@ $(document).ready(function() {
 		switch(selectedTool) {
 			case "draw-square":
 				// Send the new rect to other clients
-				var attrs = rect.attrs;
+				var attrs = shape.attrs;
 
 				client.emit("drawNode", {
 					type: "rect",
 					x: attrs.x, y: attrs.y,
 					width: attrs.width, height: attrs.height,
+					fill: attrs.fill, 
+					name: attrs.name,
+					from: nick
+				});
+				break;
+			case "draw-circle":
+				// Send the new circle to other clients
+				var attrs = shape.attrs;
+
+				client.emit("drawNode", {
+					type: "circle",
+					x: attrs.x, y: attrs.y,
+					radius: attrs.radius,
 					fill: attrs.fill, 
 					name: attrs.name,
 					from: nick
@@ -225,6 +279,11 @@ $(document).ready(function() {
 
 		// Get the node and place it on top of all siblings
 		var shape = drawLayer.find("." + data.name)[0];
+
+		if(!shape) {
+			socket.emit("redrawNodes", {});
+		}
+
 		shape.moveToTop();
 
 		// Animate node to new position
@@ -248,6 +307,16 @@ $(document).ready(function() {
 				shape = new Kinetic.Rect({
 					x: data.x, y: data.y,
 					width: data.width, height: data.height,
+					fill: data.fill,
+					name: data.name,
+					draggable: true
+				});
+
+				break;
+			case "circle":
+				shape = new Kinetic.Circle({
+					x: data.x, y: data.y,
+					radius: data.radius,
 					fill: data.fill,
 					name: data.name,
 					draggable: true
