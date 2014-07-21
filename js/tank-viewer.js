@@ -342,7 +342,7 @@ $(document).ready(function() {
 		drawLayer.add(shape).draw();
 	});
 
-	// Add a ping to the map, animate it and remove it
+	// Add a ping to the map, animate it and remove it with text of origin
 	client.on("pingMap", function(data) {
 		var ping = new Kinetic.Circle({
 			radius: 5,
@@ -352,20 +352,39 @@ $(document).ready(function() {
 			x: data.x, y: data.y,
 			name: "ping"
 		});
+		var text = new Kinetic.Text({
+			text: data.from,
+			fill: "rgba(" + data.colour.r + ", " + 
+				data.colour.g + ", " + 
+				data.colour.b + ", 1)",
+			name: "pingText"
+		});
 
-		// TODO: Add text
+		text.x(data.x - text.getWidth() / 2);
+		text.y(data.y + 20);
 
+		drawLayer.add(text)
 		drawLayer.add(ping);
 		drawLayer.draw();		
 
 		new Kinetic.Tween({
 			node: ping,
-			duration: 0.4,
+			duration: 0.3,
 			radius: 30,
 			easing: Kinetic.Easings.EaseInOut,
 			opacity: 0,
 			onFinish: function() {
 				ping.remove();
+
+				new Kinetic.Tween({
+					node: text,
+					duration: 0.2,
+					opacity: 0,
+					easing: Kinetic.Easings.EaseInOut,
+					onFinish: function() {
+						text.remove();
+					}
+				}).play();
 			}
 		}).play();
 	});
