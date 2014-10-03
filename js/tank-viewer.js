@@ -40,6 +40,7 @@ $(document).ready(function() {
 
 		switch(selectedTool) {
 			case "ping-map":
+				// TODO: Add line pings
 				client.emit("pingMap", {
 					x: e.evt.layerX, y: e.evt.layerY,
 					colour: palette["ping-map-colour"],
@@ -72,6 +73,16 @@ $(document).ready(function() {
 						from: nick
 					});
 				});
+				shape.on("mouseover", function(e) {
+					container.css({
+						cursor: "move"
+					});
+				});
+				shape.on("mouseout", function(e) {
+					container.css({
+						cursor: "auto"
+					});
+				});
 
 				drawLayer.add(shape);
 				break;
@@ -100,6 +111,30 @@ $(document).ready(function() {
 						x: e.target.attrs.x, y: e.target.attrs.y,
 						from: nick
 					});
+				});
+				shape.on("mouseover", function(e) {
+					container.css({
+						cursor: "move"
+					});
+
+					new Kinetic.Tween({
+						node: shape,
+						duration: 0.25,
+						easing: Kinetic.Easings.EaseInOut,
+						opacity: 0.8
+					}).play();
+				});
+				shape.on("mouseout", function(e) {
+					container.css({
+						cursor: "auto"
+					});
+
+					new Kinetic.Tween({
+						node: shape,
+						duration: 0.25,
+						easing: Kinetic.Easings.EaseInOut,
+						opacity: 1
+					}).play();
 				});
 
 				drawLayer.add(shape);
@@ -337,6 +372,30 @@ $(document).ready(function() {
 				x: e.target.attrs.x, y: e.target.attrs.y,
 				from: nick
 			});
+		});
+		shape.on("mouseover", function(e) {
+			container.css({
+				cursor: "move"
+			});
+
+			new Kinetic.Tween({
+				node: shape,
+				duration: 0.25,
+				easing: Kinetic.Easings.EaseInOut,
+				opacity: 0.8
+			}).play();
+		});
+		shape.on("mouseout", function(e) {
+			container.css({
+				cursor: "auto"
+			});
+
+			new Kinetic.Tween({
+				node: shape,
+				duration: 0.25,
+				easing: Kinetic.Easings.EaseInOut,
+				opacity: 1
+			}).play();
 		});
 
 		drawLayer.add(shape).draw();
