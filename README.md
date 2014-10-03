@@ -1,6 +1,6 @@
 # Wot-Tactic-Viewer
 
-A HTML5/JavaScript based tactic sharing/viewing platform for World of Tanks.
+A HTML5/JavaScript/NodeJS based tactic sharing/viewing platform for World of Tanks.
 
 ## Libraries used
 [Bootstrap 3](http://getbootstrap.com/), 

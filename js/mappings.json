@@ -1,6 +1,9 @@
 {
 	"maps": {
 		"Karelia": "01_karelia",
-		"Malinovka": "02_malinovka"
+		"Malinovka": "02_malinovka",
+		"Lakeville": "07_lakeville",
+		"Cliff": "18_cliff",
+		"South Coast": "39_crimea"
 	}
 }
